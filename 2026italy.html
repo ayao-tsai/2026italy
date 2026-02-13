@@ -37,7 +37,7 @@
             background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
         }
 
-        #map { height: 300px; border-radius: 16px; border: 1px solid #eee7de; margin-bottom: 24px; z-index: 10; }
+        #map { height: 320px; border-radius: 16px; border: 1px solid #eee7de; margin-bottom: 24px; z-index: 10; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--cafe-bg); }
@@ -66,13 +66,14 @@
                     <p class="text-[10px] font-bold text-[#b5a391] uppercase tracking-[0.2em] mb-4">概覽</p>
                     <div class="flex flex-col space-y-2">
                         <button onclick="switchTab('flight')" id="tab-flight" class="text-left py-2 px-1 transition-all hover:text-[#a68d71]">✈️ 航班資訊</button>
-                        <button onclick="switchTab('budget')" id="tab-budget" class="text-left py-2 px-1 transition-all hover:text-[#a68d71]">💰 經費明細</button>
-                        <button onclick="switchTab('stay')" id="tab-stay" class="text-left py-2 px-1 transition-all hover:text-[#a68d71] text-[#8e7b6d] font-bold">🏡 推薦飯店</button>
+                        <button onclick="switchTab('budget')" id="tab-budget" class="text-left py-2 px-1 transition-all hover:text-[#a68d71] font-bold">💰 經費明細</button>
+                        <button onclick="switchTab('klook')" id="tab-klook" class="text-left py-2 px-1 transition-all hover:text-[#a68d71] text-[#c0a48a]">🔥 搶票警戒</button>
+                        <button onclick="switchTab('backup')" id="tab-backup" class="text-left py-2 px-1 transition-all hover:text-[#a68d71] text-[#94a187]">✨ 免票景點</button>
                     </div>
                 </section>
                 
                 <section>
-                    <p class="text-[10px] font-bold text-[#b5a391] uppercase tracking-[0.2em] mb-4">日期行程與相對位置</p>
+                    <p class="text-[10px] font-bold text-[#b5a391] uppercase tracking-[0.2em] mb-4">日期行程與移動路線</p>
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="showDay(1)" id="btn-day-1" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/3 (日)</button>
                         <button onclick="showDay(2)" id="btn-day-2" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/4 (一)</button>
@@ -92,30 +93,91 @@
         <!-- Main Content -->
         <main id="content" class="flex-grow p-8 md:p-16 overflow-y-auto max-h-screen bg-white">
             
+            <!-- SECTION: FLIGHT -->
             <div id="section-flight" class="section hidden animate-fadeIn">
                 <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">✈️ 航班時光</h2>
                 <div class="space-y-12 text-sm">
                     <div class="relative pl-8 border-l border-[#eee7de]">
                         <div class="absolute -left-1 top-0 w-2 h-2 rounded-full bg-[#a68d71]"></div>
-                        <p class="text-[10px] text-[#a68d71] uppercase tracking-widest mb-1">DEPARTURE</p>
+                        <p class="text-[10px] text-[#a68d71] uppercase tracking-widest mb-1">DEPARTURE 去程</p>
                         <p class="text-xl serif text-[#4a4a4a]">05/03 (日) 台北 00:30 → 羅馬 13:25</p>
+                        <p class="text-xs text-slate-400 mt-2 font-light">阿聯酋航豪經艙，於杜拜 (DXB) 轉機。抵達羅馬 FCO 當天即展開蜜月。</p>
+                    </div>
+                    <div class="relative pl-8 border-l border-[#eee7de]">
+                        <div class="absolute -left-1 top-0 w-2 h-2 rounded-full bg-[#a68d71]"></div>
+                        <p class="text-[10px] text-[#a68d71] uppercase tracking-widest mb-1">RETURN 回程</p>
+                        <p class="text-xl serif text-[#4a4a4a]">05/12 (二) 羅馬 10:00 → 台北 15:30 (+1)</p>
+                        <p class="text-xs text-slate-400 mt-2 font-light">
+                            05/12 早上羅馬 FCO 出發，杜拜轉機。預計於 05/13 (三) 下午抵達台北 TPE。<br>
+                            帶著滿載記憶的鏡頭與 Sherry 回家。
+                        </p>
                     </div>
                 </div>
             </div>
 
+            <!-- SECTION: BUDGET -->
             <div id="section-budget" class="section hidden animate-fadeIn">
-                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">💰 預算明細</h2>
-                <div class="bg-[#fcfbf9] rounded-2xl p-8 border border-[#eee7de] mb-10 text-sm">
-                    <p>總預計：$233,384</p>
+                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">💰 旅費經費詳列 (兩人預估)</h2>
+                
+                <div class="space-y-8">
+                    <!-- Category: Fixed -->
+                    <section>
+                        <h3 class="text-xs font-bold text-[#a68d71] uppercase tracking-widest mb-4 border-b border-[#eee7de] pb-1">航空與大宗支出 (航空官網/訂房網)</h3>
+                        <table class="w-full text-xs">
+                            <tr class="h-10"><td>阿聯酋豪經艙 (已付)</td><td class="text-right italic">NT$ 105,634</td></tr>
+                            <tr class="h-10"><td>飯店住宿 (9晚預算)</td><td class="text-right italic">~ NT$ 63,000</td></tr>
+                        </table>
+                    </section>
+
+                    <!-- Category: Transport -->
+                    <section>
+                        <h3 class="text-xs font-bold text-[#a68d71] uppercase tracking-widest mb-4 border-b border-[#eee7de] pb-1">交通明細 (預估 €450)</h3>
+                        <table class="w-full text-xs">
+                            <tr class="h-10"><td>Leonardo Express 機場快線 (€14x2x2)</td><td class="text-right italic">~ NT$ 2,000</td></tr>
+                            <tr class="h-10"><td>Italo 高鐵 (羅馬-佛羅倫斯 兩人)</td><td class="text-right italic">~ NT$ 2,500</td></tr>
+                            <tr class="h-10"><td>托斯卡尼租車 (3天含保險)</td><td class="text-right italic">~ NT$ 8,500</td></tr>
+                            <tr class="h-10"><td>油資、停車費、過路費預估</td><td class="text-right italic">~ NT$ 2,500</td></tr>
+                        </table>
+                    </section>
+
+                    <!-- Category: On-site Cash -->
+                    <section>
+                        <h3 class="text-xs font-bold text-[#a68d71] uppercase tracking-widest mb-4 border-b border-[#eee7de] pb-1">現場必要支出 (建議準備現金)</h3>
+                        <table class="w-full text-xs">
+                            <tr class="h-10"><td>城市稅 City Tax (羅馬/翡冷翠/農莊)</td><td class="text-right italic">~ €120 (NT$ 4,200)</td></tr>
+                            <tr class="h-10"><td>餐飲桌費 Coperto (€2-3/人/餐)</td><td class="text-right italic">~ €80 (NT$ 2,800)</td></tr>
+                            <tr class="h-10"><td>每日三餐與 Gelato 預算</td><td class="text-right italic">~ €1000 (NT$ 35,000)</td></tr>
+                        </table>
+                    </section>
+                </div>
+
+                <div class="mt-10 p-8 bg-[#fcfbf9] rounded-2xl border border-[#eee7de] text-center card-shadow">
+                    <p class="text-[10px] text-[#b5a391] uppercase tracking-widest mb-2">Estimated Total</p>
+                    <p class="serif text-3xl text-[#a68d71]">NT$ 233,384</p>
+                    <div class="mt-4 pt-4 border-t border-[#eee7de] flex justify-around text-[10px] text-slate-400">
+                        <div>💳 刷卡回饋：約 6,800 點</div>
+                        <div>💶 建議現金：€900</div>
+                    </div>
                 </div>
             </div>
 
-            <div id="section-stay" class="section hidden animate-fadeIn">
-                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">🏡 推薦飯店</h2>
-                <div class="space-y-4 text-sm">
-                    <p>• 羅馬：IQ Hotel Roma</p>
-                    <p>• 佛羅倫斯：25hours Hotel</p>
-                    <p>• 托斯卡尼：Agriturismo Il Casalino</p>
+            <!-- SECTION: KLOOK -->
+            <div id="section-klook" class="section hidden animate-fadeIn">
+                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">🔥 搶票警戒區</h2>
+                <div class="p-6 rounded-2xl border border-[#eee7de] bg-[#fdfdfd] text-sm">
+                    <h4 class="serif text-lg text-[#4a4a4a] mb-2">羅馬 & 佛羅倫斯核心景點</h4>
+                    <p class="text-xs text-slate-400 font-light leading-relaxed">競技場、梵蒂岡、百花大教堂登頂建議提前 30-60 天預約，或購買 Klook 導覽行程。</p>
+                </div>
+            </div>
+
+            <!-- SECTION: BACKUP -->
+            <div id="section-backup" class="section hidden animate-fadeIn">
+                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">✨ 免票散策景點</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+                    <div class="p-4 border-b border-[#eee7de]">
+                        <p class="font-medium text-[#4a4a4a]">卡比托利歐山後側</p>
+                        <p class="text-[10px] text-slate-400 mt-1 font-light italic">俯瞰羅馬遺跡的最佳免費攝影位。</p>
+                    </div>
                 </div>
             </div>
 
@@ -137,7 +199,7 @@
             {
                 day: 1, date: "5/3 (日)", title: "抵達羅馬：初見時刻", desc: "中午抵達 FCO 機場，第一天不設限，適應羅馬巷弄的午後光影。",
                 stay: "羅馬 Rome",
-                center: [41.890, 12.480], zoom: 13,
+                center: [41.890, 12.420], zoom: 12,
                 spots: [
                     { name: "FCO 機場", lat: 41.799, lng: 12.246, time: "40 min", note: "搭乘快線" },
                     { name: "越台伯河區", lat: 41.889, lng: 12.467, time: "3 hr", note: "慢漫街拍" }
@@ -157,7 +219,7 @@
                 todo: ["注意穿著規定", "QR Code 備妥"]
             },
             {
-                day: 3, date: "5/5 (二)", title: "競技場：千年之光", desc: "步入竞技場，隨後漫步至萬神殿與許願池。",
+                day: 3, date: "5/5 (二)", title: "競技場：千年之光", desc: "步入競技場，隨後漫步至萬神殿與許願池。",
                 stay: "羅馬 Rome",
                 center: [41.895, 12.485], zoom: 14,
                 spots: [
@@ -227,18 +289,18 @@
                 todo: ["舊泳衣處理", "買羊乳酪"]
             },
             {
-                day: 9, date: "5/11 (一)", title: "天空之城：歸途時光", desc: "造訪天空之城後返回羅馬。",
+                day: 9, date: "5/11 (一)", title: "天空之城：歸途時刻", desc: "造訪天空之城後返回羅馬。",
                 stay: "羅馬 Rome (Termini 車站旁)",
                 center: [42.300, 12.300], zoom: 9,
                 spots: [
                     { name: "天空之城 Civita", lat: 42.627, lng: 12.113, time: "3 hr", note: "步行長橋" },
                     { name: "Rome FCO 還車", lat: 41.796, lng: 12.251, time: "2 hr", note: "機場還車" }
                 ],
-                photo: "從托斯卡尼開往羅馬約 2.5 小時，天空之城是完美的中停點。",
+                photo: "從托斯卡尼開往羅馬約 2.5 小時，天空之城是完美的中探點。",
                 todo: ["加滿油再還車", "檢查行李"]
             },
             {
-                day: 10, date: "5/12 (二)", title: "帶著故事回家", desc: "最後的早餐，準備啟程。",
+                day: 10, date: "5/12 (二)", title: "帶著故事，啟程回家", desc: "最後的早餐，準備啟程。",
                 stay: "飛機上 In Flight",
                 center: [41.799, 12.246], zoom: 13,
                 spots: [
@@ -249,12 +311,14 @@
             }
         ];
 
+        // Initialize Map
         let map = L.map('map').setView([41.890, 12.480], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
         let markers = [];
+        let activeRoute = null;
 
         function switchTab(tab) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
@@ -271,21 +335,41 @@
             
             const day = days[n-1];
             
-            // Update Map
+            // Clear Map
             markers.forEach(m => map.removeLayer(m));
             markers = [];
+            if (activeRoute) {
+                map.removeLayer(activeRoute);
+                activeRoute = null;
+            }
+
+            // Add Markers
+            const pathCoordinates = [];
             day.spots.forEach(s => {
                 const marker = L.marker([s.lat, s.lng]).addTo(map).bindPopup(`<b>${s.name}</b><br>${s.note}`);
                 markers.push(marker);
+                pathCoordinates.push([s.lat, s.lng]);
             });
+
+            // Draw Route
+            if (pathCoordinates.length > 1) {
+                activeRoute = L.polyline(pathCoordinates, {
+                    color: '#a68d71',
+                    weight: 3,
+                    opacity: 0.6,
+                    dashArray: '10, 10',
+                    lineJoin: 'round'
+                }).addTo(map);
+            }
+
             map.setView(day.center, day.zoom);
 
-            // Update Header
+            // Update Header Area
             document.getElementById('day-header-area').innerHTML = `
-                <div class="animate-fadeIn mb-6">
+                <div class="animate-fadeIn mb-6 text-sm">
                     <div class="flex flex-col md:flex-row md:items-end justify-between mb-2 pb-4 border-b border-[#eee7de]">
                         <h2 class="serif text-3xl text-[#6d5d4b]">${day.date} ${day.title}</h2>
-                        <span class="text-[10px] text-[#a68d71] font-bold tracking-[0.3em] mt-2 md:mt-0 uppercase">Day ${day.day}</span>
+                        <span class="text-[10px] text-[#a68d71] font-bold tracking-[0.3em] mt-2 md:mt-0 uppercase font-sans">Day ${day.day}</span>
                     </div>
                     <div class="flex items-center text-[10px] text-[#94a187] mt-1 tracking-[0.1em] font-bold">
                         <span class="mr-2">🏡 今晚下榻：</span><span>${day.stay}</span>
@@ -293,7 +377,7 @@
                 </div>
             `;
 
-            // Update Content
+            // Update Content Area
             const content = `
                 <div class="animate-fadeIn">
                     <p class="text-sm text-slate-400 mb-8 leading-loose italic font-light">"${day.desc}"</p>
@@ -304,7 +388,7 @@
                                     <p class="text-sm font-medium text-[#4a4a4a]">${s.name}</p>
                                     <p class="text-[10px] text-slate-400 font-light">${s.note}</p>
                                 </div>
-                                <span class="text-[10px] text-white bg-[#d8c4b6] px-2 py-1 rounded-full font-bold">${s.time}</span>
+                                <span class="text-[10px] text-white bg-[#d8c4b6] px-2 py-1 rounded-full font-bold font-sans">${s.time}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -319,7 +403,7 @@
                                 ${day.todo.map((t, idx) => `
                                     <li class="flex items-center">
                                         <input type="checkbox" id="todo-${n}-${idx}" onchange="toggleTodo('todo-${n}-${idx}')" class="mr-3 accent-[#a68d71]">
-                                        <label for="todo-${n}-${idx}" class="cursor-pointer hover:text-[#a68d71]">${t}</label>
+                                        <label for="todo-${n}-${idx}" class="cursor-pointer hover:text-[#a68d71] transition-colors">${t}</label>
                                     </li>
                                 `).join('')}
                             </ul>
