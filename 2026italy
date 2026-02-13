@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayao & Sherry 義大利蜜月散策 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Leaflet Maps CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --cafe-bg: #fdfaf7;
+            --cafe-paper: #ffffff;
+            --cafe-text: #4a4a4a;
+            --cafe-accent: #a68d71;
+            --cafe-muted: #d8c4b6;
+            --cafe-green: #94a187;
+        }
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: var(--cafe-bg); 
+            color: var(--cafe-text);
+            letter-spacing: 0.02em;
+        }
+        .serif { font-family: 'Noto Serif TC', serif; letter-spacing: 0.05em; }
+        .tab-active { 
+            color: var(--cafe-accent); 
+            font-weight: 600; 
+            border-bottom: 2px solid var(--cafe-accent);
+        }
+        .checked { text-decoration: line-through; color: #b5b5b5; opacity: 0.6; }
+        .card-shadow { box-shadow: 0 10px 30px -10px rgba(166, 141, 113, 0.15); }
+        .day-btn-active { background-color: var(--cafe-accent); color: white; border-radius: 8px; }
+        
+        .paper-texture {
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        #map { height: 300px; border-radius: 16px; border: 1px solid #eee7de; margin-bottom: 24px; z-index: 10; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--cafe-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--cafe-muted); border-radius: 10px; }
+        
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="paper-texture">
+
+    <div class="max-w-6xl mx-auto min-h-screen flex flex-col md:flex-row my-0 md:my-10 card-shadow rounded-none md:rounded-3xl overflow-hidden bg-white">
+        
+        <!-- Sidebar Navigation -->
+        <nav class="w-full md:w-72 bg-[#f9f5f0] border-r border-[#eee7de] p-8 flex-shrink-0">
+            <div class="mb-12 text-center md:text-left">
+                <h1 class="serif text-2xl text-[#6d5d4b] font-bold leading-relaxed tracking-widest">
+                    義大利蜜月散策<br>
+                    <span class="text-sm font-light text-[#a68d71]">Ayao & Sherry 2026</span>
+                </h1>
+                <div class="h-px w-12 bg-[#a68d71] mt-4 mx-auto md:mx-0"></div>
+            </div>
+            
+            <div class="space-y-6 text-sm">
+                <section>
+                    <p class="text-[10px] font-bold text-[#b5a391] uppercase tracking-[0.2em] mb-4">概覽</p>
+                    <div class="flex flex-col space-y-2">
+                        <button onclick="switchTab('flight')" id="tab-flight" class="text-left py-2 px-1 transition-all hover:text-[#a68d71]">✈️ 航班資訊</button>
+                        <button onclick="switchTab('budget')" id="tab-budget" class="text-left py-2 px-1 transition-all hover:text-[#a68d71]">💰 經費明細</button>
+                        <button onclick="switchTab('stay')" id="tab-stay" class="text-left py-2 px-1 transition-all hover:text-[#a68d71] text-[#8e7b6d] font-bold">🏡 推薦飯店</button>
+                    </div>
+                </section>
+                
+                <section>
+                    <p class="text-[10px] font-bold text-[#b5a391] uppercase tracking-[0.2em] mb-4">日期行程與相對位置</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="showDay(1)" id="btn-day-1" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/3 (日)</button>
+                        <button onclick="showDay(2)" id="btn-day-2" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/4 (一)</button>
+                        <button onclick="showDay(3)" id="btn-day-3" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/5 (二)</button>
+                        <button onclick="showDay(4)" id="btn-day-4" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/6 (三)</button>
+                        <button onclick="showDay(5)" id="btn-day-5" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/7 (四)</button>
+                        <button onclick="showDay(6)" id="btn-day-6" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/8 (五)</button>
+                        <button onclick="showDay(7)" id="btn-day-7" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/9 (六)</button>
+                        <button onclick="showDay(8)" id="btn-day-8" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/10 (日)</button>
+                        <button onclick="showDay(9)" id="btn-day-9" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/11 (一)</button>
+                        <button onclick="showDay(10)" id="btn-day-10" class="day-btn py-2 px-3 flex items-center justify-center rounded-lg text-[11px] transition-all hover:bg-[#eee7de]">5/12 (二)</button>
+                    </div>
+                </section>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main id="content" class="flex-grow p-8 md:p-16 overflow-y-auto max-h-screen bg-white">
+            
+            <div id="section-flight" class="section hidden animate-fadeIn">
+                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">✈️ 航班時光</h2>
+                <div class="space-y-12 text-sm">
+                    <div class="relative pl-8 border-l border-[#eee7de]">
+                        <div class="absolute -left-1 top-0 w-2 h-2 rounded-full bg-[#a68d71]"></div>
+                        <p class="text-[10px] text-[#a68d71] uppercase tracking-widest mb-1">DEPARTURE</p>
+                        <p class="text-xl serif text-[#4a4a4a]">05/03 (日) 台北 00:30 → 羅馬 13:25</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-budget" class="section hidden animate-fadeIn">
+                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">💰 預算明細</h2>
+                <div class="bg-[#fcfbf9] rounded-2xl p-8 border border-[#eee7de] mb-10 text-sm">
+                    <p>總預計：$233,384</p>
+                </div>
+            </div>
+
+            <div id="section-stay" class="section hidden animate-fadeIn">
+                <h2 class="serif text-3xl mb-10 text-[#6d5d4b]">🏡 推薦飯店</h2>
+                <div class="space-y-4 text-sm">
+                    <p>• 羅馬：IQ Hotel Roma</p>
+                    <p>• 佛羅倫斯：25hours Hotel</p>
+                    <p>• 托斯卡尼：Agriturismo Il Casalino</p>
+                </div>
+            </div>
+
+            <!-- SECTION: DAY (DYNAMIC) -->
+            <div id="section-day" class="section">
+                <div id="day-header-area"></div>
+                <!-- Interactive Map Area -->
+                <div id="map"></div>
+                <div id="day-content"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Leaflet Maps JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const days = [
+            {
+                day: 1, date: "5/3 (日)", title: "抵達羅馬：初見時刻", desc: "中午抵達 FCO 機場，第一天不設限，適應羅馬巷弄的午後光影。",
+                stay: "羅馬 Rome",
+                center: [41.890, 12.480], zoom: 13,
+                spots: [
+                    { name: "FCO 機場", lat: 41.799, lng: 12.246, time: "40 min", note: "搭乘快線" },
+                    { name: "越台伯河區", lat: 41.889, lng: 12.467, time: "3 hr", note: "慢漫街拍" }
+                ],
+                photo: "GR3x 正片模式，捕捉蔓藤與夕陽。",
+                todo: ["辦理入住", "辦理 SIM 卡"]
+            },
+            {
+                day: 2, date: "5/4 (一)", title: "梵蒂岡：靈魂的對稱", desc: "深入全世界最小的國家，感受文藝復興的最高殿堂。",
+                stay: "羅馬 Rome",
+                center: [41.903, 12.458], zoom: 15,
+                spots: [
+                    { name: "梵蒂岡博物館", lat: 41.906, lng: 12.453, time: "4.5 hr", note: "旋轉樓梯重點" },
+                    { name: "聖彼得大教堂", lat: 41.902, lng: 12.453, time: "2 hr", note: "下午捕捉神光" }
+                ],
+                photo: "A6700 廣角捕捉穹頂。這兩點步行 10 分鐘內。",
+                todo: ["注意穿著規定", "QR Code 備妥"]
+            },
+            {
+                day: 3, date: "5/5 (二)", title: "競技場：千年之光", desc: "步入竞技場，隨後漫步至萬神殿與許願池。",
+                stay: "羅馬 Rome",
+                center: [41.895, 12.485], zoom: 14,
+                spots: [
+                    { name: "羅馬競技場", lat: 41.890, lng: 12.492, time: "2.5 hr", note: "地下層導覽" },
+                    { name: "萬神殿", lat: 41.898, lng: 12.476, time: "1 hr", note: "穹頂光影" },
+                    { name: "許願池", lat: 41.901, lng: 12.483, time: "1 hr", note: "人潮眾多" }
+                ],
+                photo: "這三點形成一個三角形，步行約 20-30 分鐘可串聯。",
+                todo: ["買 Giolitti 冰淇淋", "穿最舒適的鞋"]
+            },
+            {
+                day: 4, date: "5/6 (三)", title: "佛羅倫斯：文藝首航", desc: "搭乘高鐵轉移到全世界最文藝的城市。",
+                stay: "佛羅倫斯 Florence",
+                center: [43.773, 11.255], zoom: 15,
+                spots: [
+                    { name: "Firenze SMN 車站", lat: 43.776, lng: 11.247, time: "1.5 hr", note: "高鐵抵達" },
+                    { name: "聖母百花大教堂", lat: 43.773, lng: 11.256, time: "2 hr", note: "紅磚穹頂" }
+                ],
+                photo: "佛羅倫斯非常迷你，主要景點走路都在 15 分鐘內。",
+                todo: ["中央市場吃牛肚包", "飯店切換 CUBE 權益"]
+            },
+            {
+                day: 5, date: "5/7 (四)", title: "美術館與河岸職人", desc: "上午觀展，下午跨過阿諾河走入職人區。",
+                stay: "佛羅倫斯 Florence",
+                center: [43.768, 11.252], zoom: 15,
+                spots: [
+                    { name: "烏菲茲美術館", lat: 43.767, lng: 11.255, time: "4 hr", note: "深度攝影" },
+                    { name: "學院美術館", lat: 43.776, lng: 11.258, time: "1.5 hr", note: "大衛像" },
+                    { name: "Oltrarno 區", lat: 43.767, lng: 11.247, time: "3 hr", note: "慢漫街拍" }
+                ],
+                photo: "三個點在河的兩岸，形成一個長方形動線。",
+                todo: ["檢查相機備份", "預約佛羅倫斯大牛排"]
+            },
+            {
+                day: 6, date: "5/8 (五)", title: "落日餘暉下的百萬景觀", desc: "最後一天的翡冷翠，把光影留給米開朗基羅廣場。",
+                stay: "佛羅倫斯 Florence",
+                center: [43.765, 11.258], zoom: 15,
+                spots: [
+                    { name: "老橋 Ponte Vecchio", lat: 43.768, lng: 11.253, time: "2 hr", note: "伴手禮採買" },
+                    { name: "米開朗基羅廣場", lat: 43.763, lng: 11.265, time: "2.5 hr", note: "夕陽拍攝" }
+                ],
+                photo: "老橋走往廣場需要爬坡，約 15-20 分鐘路程。",
+                todo: ["帶白酒去廣場", "確認日落時間"]
+            },
+            {
+                day: 7, date: "5/9 (六)", title: "自駕開啟：托斯卡尼", desc: "領取座駕，駛向奧爾恰山谷。",
+                stay: "奧爾恰山谷農莊 Val d'Orcia",
+                center: [43.400, 11.450], zoom: 9,
+                spots: [
+                    { name: "SMN 取車點", lat: 43.776, lng: 11.247, time: "1 hr", note: "自駕起點" },
+                    { name: "錫耶納 Siena", lat: 43.318, lng: 11.331, time: "3 hr", note: "扇形廣場" },
+                    { name: "Baccoleno 絲柏之路", lat: 43.201, lng: 11.583, time: "2 hr", note: "夕陽卡位" }
+                ],
+                photo: "這天路程較長，開車時間約 2.5 小時，屬於壯闊大景攝影。",
+                todo: ["錄影車況", "Waze 設定 ZTL 避開"]
+            },
+            {
+                day: 8, date: "5/10 (日)", title: "森林溫泉與理想國", desc: "清晨溫泉，中午漫步皮恩札。",
+                stay: "奧爾恰山谷農莊 Val d'Orcia",
+                center: [43.000, 11.650], zoom: 11,
+                spots: [
+                    { name: "白鯨溫泉", lat: 42.929, lng: 11.694, time: "2.5 hr", note: "森林溫泉" },
+                    { name: "Pienza 皮恩札", lat: 43.077, lng: 11.678, time: "3 hr", note: "理想小鎮" },
+                    { name: "Vitaleta 教堂", lat: 43.070, lng: 11.634, time: "1 hr", note: "夕陽孤獨感" }
+                ],
+                photo: "都在奧爾恰山谷內，景點間開車 15-20 分鐘。",
+                todo: ["舊泳衣處理", "買羊乳酪"]
+            },
+            {
+                day: 9, date: "5/11 (一)", title: "天空之城：歸途時光", desc: "造訪天空之城後返回羅馬。",
+                stay: "羅馬 Rome (Termini 車站旁)",
+                center: [42.300, 12.300], zoom: 9,
+                spots: [
+                    { name: "天空之城 Civita", lat: 42.627, lng: 12.113, time: "3 hr", note: "步行長橋" },
+                    { name: "Rome FCO 還車", lat: 41.796, lng: 12.251, time: "2 hr", note: "機場還車" }
+                ],
+                photo: "從托斯卡尼開往羅馬約 2.5 小時，天空之城是完美的中停點。",
+                todo: ["加滿油再還車", "檢查行李"]
+            },
+            {
+                day: 10, date: "5/12 (二)", title: "帶著故事回家", desc: "最後的早餐，準備啟程。",
+                stay: "飛機上 In Flight",
+                center: [41.799, 12.246], zoom: 13,
+                spots: [
+                    { name: "FCO 機場", lat: 41.799, lng: 12.246, time: "3 hr", note: "退稅與採買" }
+                ],
+                photo: "在機場拍拍 Sherry 的側顏，紀錄旅程終點。",
+                todo: ["核對退稅單", "提早 3 小時抵達"]
+            }
+        ];
+
+        let map = L.map('map').setView([41.890, 12.480], 13);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        let markers = [];
+
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById('section-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('tab-active');
+        }
+
+        function showDay(n) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('section-day').classList.remove('hidden');
+            document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('day-btn-active'));
+            document.getElementById('btn-day-' + n).classList.add('day-btn-active');
+            
+            const day = days[n-1];
+            
+            // Update Map
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            day.spots.forEach(s => {
+                const marker = L.marker([s.lat, s.lng]).addTo(map).bindPopup(`<b>${s.name}</b><br>${s.note}`);
+                markers.push(marker);
+            });
+            map.setView(day.center, day.zoom);
+
+            // Update Header
+            document.getElementById('day-header-area').innerHTML = `
+                <div class="animate-fadeIn mb-6">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-2 pb-4 border-b border-[#eee7de]">
+                        <h2 class="serif text-3xl text-[#6d5d4b]">${day.date} ${day.title}</h2>
+                        <span class="text-[10px] text-[#a68d71] font-bold tracking-[0.3em] mt-2 md:mt-0 uppercase">Day ${day.day}</span>
+                    </div>
+                    <div class="flex items-center text-[10px] text-[#94a187] mt-1 tracking-[0.1em] font-bold">
+                        <span class="mr-2">🏡 今晚下榻：</span><span>${day.stay}</span>
+                    </div>
+                </div>
+            `;
+
+            // Update Content
+            const content = `
+                <div class="animate-fadeIn">
+                    <p class="text-sm text-slate-400 mb-8 leading-loose italic font-light">"${day.desc}"</p>
+                    <div class="space-y-4 mb-12">
+                        ${day.spots.map(s => `
+                            <div class="flex items-center justify-between p-4 bg-[#fcfbf9] rounded-xl border border-[#eee7de]">
+                                <div>
+                                    <p class="text-sm font-medium text-[#4a4a4a]">${s.name}</p>
+                                    <p class="text-[10px] text-slate-400 font-light">${s.note}</p>
+                                </div>
+                                <span class="text-[10px] text-white bg-[#d8c4b6] px-2 py-1 rounded-full font-bold">${s.time}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="p-6 bg-[#f7f3f0] rounded-2xl border border-[#eee7de]">
+                            <h3 class="serif text-sm font-bold text-[#6d5d4b] mb-4">📸 慢漫攝影筆記</h3>
+                            <p class="text-xs text-[#8a7a6a] leading-loose">${day.photo}</p>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="serif text-sm font-bold text-[#6d5d4b] mb-4">✅ 隨手清單</h3>
+                            <ul class="text-[11px] space-y-3">
+                                ${day.todo.map((t, idx) => `
+                                    <li class="flex items-center">
+                                        <input type="checkbox" id="todo-${n}-${idx}" onchange="toggleTodo('todo-${n}-${idx}')" class="mr-3 accent-[#a68d71]">
+                                        <label for="todo-${n}-${idx}" class="cursor-pointer hover:text-[#a68d71]">${t}</label>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('day-content').innerHTML = content;
+        }
+
+        function toggleTodo(id) { document.querySelector(`label[for="${id}"]`).classList.toggle('checked'); }
+
+        window.onload = () => { switchTab('flight'); showDay(1); switchTab('flight'); };
+    </script>
+</body>
+</html>
